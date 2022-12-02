@@ -5,7 +5,6 @@ import styles from './Cart.module.css';
 import CartContext from '../../store/cart-context';
 import CartItem from './CartItem';
 import Checkout from './Checkout';
-//import { ORDERS_URL } from '../../store/db-constants';
 
 function Cart(props) {
   const [isCheckout, setIsCheckout] = useState(false)
