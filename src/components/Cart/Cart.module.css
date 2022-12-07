@@ -44,3 +44,12 @@
   background-color: #8a2b06;
   color: white;
 }
+
+.plainText {
+  text-align: center;
+}
+
+.error {
+  text-align: center;
+  color: red;
+}

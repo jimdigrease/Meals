@@ -1,28 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
-import styles from './AvailableMeals.module.css';
+import useHttp from '../../hooks/use-http';
 import Card from '../UI/Card';
 import MealItem from './MealItem/MealItem';
-// Could use some outer constants for URLs
-//import { MEALS_URL } from '../../store/db-constants';
+import styles from './AvailableMeals.module.css';
+
+const MEALS_URL = 'https://react-http-7919e-default-rtdb.europe-west1.firebasedatabase.app/Meals.json';
 
 function AvailableMeals() {
   const [meals, setMeals] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { isLoading, error, sendRequest: fetchMeals } = useHttp();
 
   useEffect(() => {
-    // Callback-function in useEffect should be synchronous only, but inside 
-	  // new function could be asynchronous instead.
-    async function fetchMeals() {
-      const response = await fetch('https://react-http-7919e-default-rtdb.europe-west1.firebasedatabase.app/Meals.json');
-        
-      if (!response.ok) {
-        throw new Error('Something went wrong! Error: ' + response.status);
-      }
-
-      const data = await response.json();
-
+    function transformMeals(data) {
       const loadedMeals = [];
 
       for (const key in data) {
@@ -33,22 +23,15 @@ function AvailableMeals() {
           price: data[key].price
         })
       }
-      
-      setIsLoading(false);
+
       setMeals(loadedMeals);
     }
-    
-    // May wrap all function's body in try/catch block or use a traditional 
-    // Promise-only way here to catch an error when calling an async function. 
-    // Using try/catch for just calling fetchMeals() don't work, bacause of 
-    // async, need to wrap it in another async function and so on, but here 
-    // using Promise-catch method is a bit easier.
-    fetchMeals().catch((error) => {
-      setIsLoading(false);
-      setError(error.message);    
-    });
-  
-  }, []);
+
+    fetchMeals(
+      { url: MEALS_URL }, 
+      transformMeals
+    );
+  }, [fetchMeals]);
 
   const mealsList = meals.map((meal) => (
     <MealItem 

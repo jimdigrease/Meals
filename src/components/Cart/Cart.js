@@ -1,17 +1,19 @@
 import React, { useContext, useState } from 'react';
 
+import useHttp from '../../hooks/use-http';
 import Modal from '../UI/Modal';
 import styles from './Cart.module.css';
 import CartContext from '../../store/cart-context';
 import CartItem from './CartItem';
 import Checkout from './Checkout';
-//import { ORDERS_URL } from '../../store/db-constants';
+
+const ORDERS_URL = 'https://react-http-7919e-default-rtdb.europe-west1.firebasedatabase.app/orders.json';
 
 function Cart(props) {
   const [isCheckout, setIsCheckout] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [didSubmit, setdidSubmit] = useState(false);
   const cartContext = useContext(CartContext);
+  const { isLoading: isSubmitting, error, sendRequest: sendOrder } = useHttp();
 
   const totalAmount = `$${cartContext.totalAmount.toFixed(2)}`;
   const hasItems = cartContext.items.length > 0;
@@ -29,19 +31,21 @@ function Cart(props) {
   }
 
   async function submitOrderHandler(userData) {
-    setIsSubmitting(true);
-    const response = await fetch('https://react-http-7919e-default-rtdb.europe-west1.firebasedatabase.app/orders.json', {
-      method: 'POST', 
-      body: JSON.stringify({
-        user: userData, 
-        orderItems: cartContext.items
-      })
-    });
-    if (response.ok) {
-      setIsSubmitting(false);
+    await sendOrder(
+      {
+        url: ORDERS_URL,
+        method: 'POST', 
+        body: {
+          user: userData, 
+          orderItems: cartContext.items
+        }
+      }
+    ).then(() => {
       setdidSubmit(true);
       cartContext.clearCart();
-    }
+    }).catch(error => {
+      console.log(error);
+    });
   }
 
   const cartItems = (
@@ -84,7 +88,14 @@ function Cart(props) {
     </React.Fragment>
   );
 
-  const submittingContent = <p>Sending order data...</p>;
+  const submittingContent = 
+    <section className={styles.plainText}>
+      <p>Sending order data...</p>
+    </section>;
+  const submitErrorContent = 
+    <section className={styles.error}>
+      <h2>Sending Order Failed!</h2>
+    </section>;
   
   const didSubmitContent = (
     <React.Fragment>
@@ -100,8 +111,9 @@ function Cart(props) {
   return (
     <Modal onClose={props.onClose}>
       {!isSubmitting && !didSubmit && cartModalContent}
-      {isSubmitting && submittingContent}
+      {isSubmitting && !error && submittingContent}
       {!isSubmitting && didSubmit && didSubmitContent}
+      {error && submitErrorContent}
     </Modal>
   );
 }
