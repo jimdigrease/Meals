@@ -9,8 +9,6 @@ const defaultCartState = {
 
 function cartReducer(state, action) {
   if (action.type === 'ADD') {
-    // Find if such item already exists in the cart to avoid duplicate lines with 
-    // the same item and show a number of amount of its in one line instead
     const existingItemId = state.items.findIndex(
       (item) => item.id === action.item.id
     );
@@ -26,7 +24,6 @@ function cartReducer(state, action) {
       updatedItems = [...state.items];
       updatedItems[existingItemId] = updatedItem;
     } else {
-      // concat() returns a new array instead of push() which changes initial array
       updatedItems = state.items.concat(action.item); 
     }
 
@@ -45,14 +42,12 @@ function cartReducer(state, action) {
 
     let updatedItems;
 
-    if (existingItem.amount === 1) { // if only one such item exists
-      // Return new array without deleting item
+    if (existingItem.amount === 1) {
       updatedItems= state.items.filter((item) => item.id !== action.id);
     } else { 
-      // if items more than one we need just to decrease its amount by one
       const updatedItem = { ...existingItem, amount: existingItem.amount -1};
-      updatedItems = [...state.items]; // create new array of items
-      updatedItems[existingItemId] = updatedItem; // and update it
+      updatedItems = [...state.items];
+      updatedItems[existingItemId] = updatedItem;
     }
 
     return { items: updatedItems, totalAmount: updatedTotalAmount };
