@@ -1,21 +1,22 @@
-import { useContext } from 'react';
+import React from 'react';
 
 import MealItemForm from './MealItemForm';
 import classes from './MealItem.module.css';
-import CartContext from '../../../store/cart-context';
+import { useStore } from '../../../hooks/use-store';
 
-const MealItem = (props) => {
-  const cartCtx = useContext(CartContext);
+const MealItem = React.memo(props => {
+  const dispatch = useStore(false)[1];
 
   const price = `$${props.price.toFixed(2)}`;
 
   const addToCartHandler = amount => {
-    cartCtx.addItem({
+    const item = {
       id: props.id,
       name: props.name,
       amount: amount,
       price: props.price
-    });
+    };
+    dispatch('ADD', { item });
   };
 
   return (
@@ -30,6 +31,10 @@ const MealItem = (props) => {
       </div>
     </li>
   );
-};
+});
 
 export default MealItem;
+
+// Usage of React.memo() with the help of shouldListen boolean-checking 
+// allows to prevent unnecessary re-rendering of this component because 
+// of using useEffect() in useStore-hook 

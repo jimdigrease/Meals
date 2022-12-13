@@ -1,29 +1,30 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 
 import useHttp from '../../hooks/use-http';
 import Modal from '../UI/Modal';
 import styles from './Cart.module.css';
-import CartContext from '../../store/cart-context';
 import CartItem from './CartItem';
 import Checkout from './Checkout';
+import { useStore } from '../../hooks/use-store';
 
 const ORDERS_URL = 'https://react-http-7919e-default-rtdb.europe-west1.firebasedatabase.app/orders.json';
 
 function Cart(props) {
   const [isCheckout, setIsCheckout] = useState(false)
   const [didSubmit, setdidSubmit] = useState(false);
-  const cartContext = useContext(CartContext);
+  const [cartState, dispatch] = useStore();
   const { isLoading: isSubmitting, error, sendRequest: sendOrder } = useHttp();
 
-  const totalAmount = `$${cartContext.totalAmount.toFixed(2)}`;
-  const hasItems = cartContext.items.length > 0;
+  const totalAmount = `$${cartState.totalAmount.toFixed(2)}`;
+  const hasItems = cartState.items.length > 0;
 
-  function cartItemAddHandler(item) {
-    cartContext.addItem({...item, amount: 1});
+  function cartItemAddHandler(itemData) {
+    const item = { ...itemData, amount: 1 }
+    dispatch('ADD', { item });
   }
 
   function cartItemRemoveHandler(id) {
-    cartContext.removeItem(id);
+    dispatch('REMOVE', { id });
   }
 
   function orderHandler() {
@@ -37,12 +38,12 @@ function Cart(props) {
         method: 'POST', 
         body: {
           user: userData, 
-          orderItems: cartContext.items
+          orderItems: cartState.items
         }
       }
     ).then(() => {
       setdidSubmit(true);
-      cartContext.clearCart();
+      dispatch('CLEAR');
     }).catch(error => {
       console.log(error);
     });
@@ -50,7 +51,7 @@ function Cart(props) {
 
   const cartItems = (
     <ul className={styles['cart-items']}>
-      {cartContext.items.map((item) => (
+      {cartState.items.map((item) => (
         <CartItem 
           key={item.id} 
           name={item.name} 

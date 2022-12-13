@@ -1,14 +1,14 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import CartIcon from '../Cart/CartIcon';
-import CartContext from '../../store/cart-context';
 import styles from './HeaderCartButton.module.css';
+import { useStore } from '../../hooks/use-store';
 
 function  HeaderCartButton (props) {
   const [btnIsHighlighted, setBtnIsHighlighted] = useState(false);
-  const cartCtx = useContext(CartContext);
-
-  const { items } = cartCtx;
+  const cartState = useStore()[0];
+  
+  const items = cartState.items;
 
   const numberOfCartItems = items.reduce((curNumber, item) => {
     return curNumber + item.amount;

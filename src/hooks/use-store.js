@@ -37,8 +37,8 @@ export function useStore(shouldListen = true) {
   useEffect(() => {
     // List of listeners contains all the set-functions for every user-component
     // So every user-component gets its own set-function, which shared in array.
-    // IF-check avoids unnecessary usage of listeners when one exact component needs  
-    // in action only. For this also must use React.memo() in user-component.
+    // IF-checking avoids unnecessary usage of listeners when one exact component 
+    // needs in action only. For this also must use React.memo() in user-component.
     if (shouldListen) {
       listeners.push(setState);
     }
